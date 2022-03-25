@@ -236,8 +236,8 @@ jobs:
       - run:
           name: Prerequisites
           command: |
-            apk install git
-            apk install npm    
+            apk add git
+            apk add npm    
       - run:
           name: Run migrations
           command: |
