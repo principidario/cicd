@@ -260,36 +260,35 @@ jobs:
       #- destroy-environment:
       #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-# deploy-frontend:
-#   docker:
-#     - image: circleci/node
-#   steps:
-#     - checkout
-#     - run:
-#         name: Install dependencies
-#         command: |
-#           sudo apt install -y python3 awscli
-#     - run:
-#         name: Get backend url
-#         command: |
-#           #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
-#           export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
-#           export API_URL="http://${BACKEND_IP}:3030"
-#           echo "API_URL = ${API_URL}"
-#           echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-#           cat frontend/.env
-#     - run:
-#         name: Deploy frontend objects
-#         command: |
-#           cd frontend
-#           npm audit fix --force
-#           npm install
-#           npm run build
-#           tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-#           aws s3 cp dist s3://udapeople-f11a082 --recursive
-#           #aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-#           # Here's where you will add some code to rollback on failure      
-#                   
+  deploy-frontend:
+    docker:
+      - image: circleci/node
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt install -y python3 awscli
+      - run:
+          name: Get backend url
+          command: |
+            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
+            export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            #aws s3 cp dist s3://udapeople-f11a082 --recursive
+            #aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            # Here's where you will add some code to rollback on failure      
+                  
 # deploy-backend:
 #   docker:
 #     - image: ansible/ansible:default
@@ -430,9 +429,10 @@ workflows:
       #- configure-infrastructure
       #- configure-infrastructure:
       #    requires: [deploy-infrastructure]
-      - run-migrations
+      #- run-migrations
       #- run-migrations:
       #    requires: [configure-infrastructure]
+      - deploy-fronted
       #- deploy-frontend:
       #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #- deploy-frontend:
