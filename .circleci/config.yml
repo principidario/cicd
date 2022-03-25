@@ -326,48 +326,52 @@ jobs:
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml
+            #ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
 
-# smoke-test:
-#   docker:
-#     - image: apline:default
-#   steps:
-#     - checkout
-#     - run:
-#         name: Install dependencies
-#         command: |
-#           apk update
-#           apk add curl nodejs npm awscli
-#     - run:
-#         name: Get backend url
-#         command: |
-#           #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
-#           export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
-#     - run:
-#         name: Backend smoke test.
-#         command: |
-#           export API_URL="http://${BACKEND_IP}:3030"
-#           echo "${API_URL}"
-#           if curl "${API_URL}/api/status" | grep "ok"
-#           then
-#               return 0
-#           else
-#               return 1
-#           fi
-#     - run:
-#         name: Frontend smoke test.
-#         command: |
-#           URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
-#           echo ${URL} 
-#           if curl -s ${URL} | grep "Welcome"
-#           then
-#           # Change this to 0 after the job fails
-#               return 1
-#           else
-#               return 1
-#           fi
-#     # Here's where you will add some code to rollback on failure  
+  smoke-test:
+    docker:
+      - image: apline
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk update
+            apk add npm
+            apk add --no-cache python3 py3-pip \
+            && pip3 install --upgrade pip \
+            && pip3 install awscli \
+            && rm -rf /var/cache/apk/*
+      - run:
+          name: Get backend url
+          command: |
+            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
+            export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
+      - run:
+          name: Backend smoke test.
+          command: |
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
+      # - run:
+      #     name: Frontend smoke test.
+      #     command: |
+      #       URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+      #       echo ${URL} 
+      #       if curl -s ${URL} | grep "Welcome"
+      #       then
+      #       # Change this to 0 after the job fails
+      #           return 1
+      #       else
+      #           return 1
+      #       fi
+      # Here's where you will add some code to rollback on failure  
 # 
 # cloudfront-update:
 #   docker:
@@ -446,9 +450,10 @@ workflows:
       #- deploy-frontend
       #- deploy-frontend:
       #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - deploy-backend
+      #- deploy-backend
       #- deploy-backend:
       #    requires: [run-migrations]
+      - smoke-test
       #- smoke-test:
       #    requires: [deploy-backend, deploy-frontend]
       #- cloudfront-update:
