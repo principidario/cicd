@@ -2,6 +2,7 @@
 
 - name: "configuration play." 
   hosts: web
+  become: yes  
   user: ubuntu
   gather_facts: false
   vars:

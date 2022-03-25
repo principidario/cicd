@@ -4,7 +4,5 @@
   community.general.npm:
     name: pm2
     path: /app/location
-- name: pm2 stop default
-  command: "pm2 stop default"
 - name: pm2 start npm -- start
   command: "pm2 start npm -- start"
