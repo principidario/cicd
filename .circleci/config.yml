@@ -445,7 +445,7 @@ workflows:
       #- deploy-frontend
       #- deploy-frontend:
       #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      deploy-backend
+      - deploy-backend
       #- deploy-backend:
       #    requires: [run-migrations]
       #- smoke-test:
