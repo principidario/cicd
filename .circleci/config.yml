@@ -313,6 +313,7 @@ jobs:
             && pip3 install --upgrade pip \
             && pip3 install awscli \
             && rm -rf /var/cache/apk/*
+            apk add ansible
       - run:
           name: Deploy backend
           command: |
