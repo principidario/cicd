@@ -196,6 +196,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+#     # Here's where you will add some code to rollback on failure      
 #     - destroy-environment:
 #         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -221,8 +222,8 @@ jobs:
               cd .circleci/ansible
               ansible-playbook --private-key udacity.pem -i inventory.txt configure-server.yml
 #     # Here's where you will add some code to rollback on failure      
-#     #- destroy-environment:
-#     #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+#     - destroy-environment:
+#         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 
 
@@ -255,8 +256,8 @@ jobs:
             fi
             
       # Here's where you will add some code to rollback on failure      
-      #- destroy-environment:
-      #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+      #- revert-migrations:
+          #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     docker:
@@ -327,7 +328,8 @@ jobs:
             cat inventory.txt
             #ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
-
+      #- revert-migrations:
+          #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
   smoke-test:
     docker:
       - image: alpine
@@ -369,28 +371,36 @@ jobs:
                 return 1
             fi
       #Here's where you will add some code to rollback on failure  
-# 
-# cloudfront-update:
-#   docker:
-#     - image: amazon/aws-cli
-#   steps:
-#     - checkout
-#     #- run:
-#     #    name: Install dependencies
-#     #    command: |
-#     #      # your code here
-#     - run:
-#         name: Update cloudfront distribution
-#         command: |
-#           aws cloudformation deploy \
-#           --template-file .circleci/files/cloudfront.yml \
-#           --stack-name InitialStack \
-#           --tags project=udapeople
-#           --parameter-overrides WorkflowID="udapeople-f11a082" \
-#           #--parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
-#     
-#     
-#     # Here's where you will add some code to rollback on failure  
+      #- revert-migrations:
+          #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+
+
+cloudfront-update:
+  docker:
+    - image: alpine
+  steps:
+    - checkout
+    - run:
+        name: Install dependencies
+        command: |
+            apk update
+            apk add npm
+            apk add --no-cache python3 py3-pip \
+            && pip3 install --upgrade pip \
+            && pip3 install awscli \
+            && rm -rf /var/cache/apk/*
+    - run:
+        name: Update cloudfront distribution
+        command: |
+          aws cloudformation deploy \
+          --template-file .circleci/files/cloudfront.yml \
+          --stack-name InitialStack \
+          --tags project=udapeople
+          --parameter-overrides WorkflowID="udapeople-f11a082" \
+          #--parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+    
+    
+    # Here's where you will add some code to rollback on failure  
 
 #cleanup:
 #   docker:
@@ -450,9 +460,10 @@ workflows:
       #- deploy-backend
       #- deploy-backend:
       #    requires: [run-migrations]
-      - smoke-test
+      #- smoke-test
       #- smoke-test:
       #    requires: [deploy-backend, deploy-frontend]
+      - cloudfront-update
       #- cloudfront-update:
       #    requires: [smoke-test]
       #- cleanup:
