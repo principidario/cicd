@@ -29,7 +29,7 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS =$(curl --insecure  https://kvdb.io/MF4Z6WcS9GKpPStzupaQix/migration_<< parameters.workflow_id >>)
+            SUCCESS =$(curl --insecure  https://kvdb.io/MF4Z6WcS9GKpPStzupaQix/migration_<< parameters.workflow-id >>)
             if(( $SUCCESS==1 )); 
             then
                 cd ~/project/backend
@@ -383,9 +383,9 @@ jobs:
             fi
       #Here's where you will add some code to rollback on failure  
       - revert-migrations:
+          workflow-id: "f11a082"
           #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
-          workflow-id: f11a082
-
+          
 
   cloudfront-update:
     docker:
