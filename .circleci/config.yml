@@ -382,8 +382,9 @@ jobs:
                 return 1
             fi
       #Here's where you will add some code to rollback on failure  
-      #- revert-migrations:
+      - revert-migrations:
           #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow-id: f11a082
 
 
   cloudfront-update:
