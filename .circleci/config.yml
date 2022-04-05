@@ -377,22 +377,21 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: alpine
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-              apk update
-              apk add npm
-              apk add --no-cache python3 py3-pip \
-              && pip3 install --upgrade pip \
-              && pip3 install awscli \
-              && rm -rf /var/cache/apk/*
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #         apk update
+      #         apk add --no-cache python3 py3-pip \
+      #         && pip3 install --upgrade pip \
+      #         && pip3 install awscli \
+      #         && rm -rf /var/cache/apk/*
       - run:
           name: Update cloudfront distribution
           command: |
-            aws cloudformation deploy \
+            cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
             --stack-name InitialStack \
             --tags project=udapeople
