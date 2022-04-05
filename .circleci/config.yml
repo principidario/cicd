@@ -170,22 +170,22 @@ jobs:
           name: Install tar and qzip
           command: |
             yum -y install tar gzip
-      - run:
-          name: Ensure back-end infrastructure exists
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
-#     - run:
-#         name: Ensure front-end infrastructure exist
-#         command: |
-#           aws cloudformation deploy \
-#             --template-file .circleci/files/frontend.yml \
-#             --tags project=udapeople \
-#             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-#             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+      # - run:
+      #     name: Ensure back-end infrastructure exists
+      #     command: |
+      #       aws cloudformation deploy \
+      #         --template-file .circleci/files/backend.yml \
+      #         --tags project=udapeople \
+      #         --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+      # - run:
+      #     name: Ensure front-end infrastructure exist
+      #     command: |
+      #       aws cloudformation deploy \
+      #         --template-file .circleci/files/frontend.yml \
+      #         --tags project=udapeople \
+      #         --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -204,11 +204,21 @@ jobs:
   configure-infrastructure:
     docker:
       - image: ansible/ansible:default
+    environment:
+      - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"
+      - TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
+      - TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST')}}"
+      - TYPEORM_PORT: 5432
+      - TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME')}}"
+      - TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD')}}"
+      - TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
+      - TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
+      - TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "3c:ee:06:16:84:cf:68:6e:12:17:e4:34:eb:63:f4:85"
+            - 3c:ee:06:16:84:cf:68:6e:12:17:e4:34:eb:63:f4:85
       - attach_workspace:
           at: ~/
       - run:
@@ -216,11 +226,12 @@ jobs:
           command: |
             apt update
             apt install -y tar gzip ansible awscli
+      
       - run:
           name: Configure server (Command runs OK in shell, but here say "cannot verify the authenticity of the host..do you want to continue?(yes/no)")
           command: |
               cd .circleci/ansible
-              ansible-playbook --private-key udacity.pem -i inventory.txt configure-server.yml
+              #ansible-playbook --private-key udacity.pem -e env=${CIRCLE_BRANCH} -i inventory.txt configure-server.yml
 #     # Here's where you will add some code to rollback on failure      
 #     - destroy-environment:
 #         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -447,8 +458,8 @@ workflows:
             #branches:
               #only: [test-feature-branch]
       #- configure-infrastructure
-      #- configure-infrastructure:
-      #    requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       #- run-migrations
       #- run-migrations:
       #    requires: [configure-infrastructure]
