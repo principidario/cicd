@@ -355,6 +355,10 @@ jobs:
             apk update
             apk add curl
             apk add npm
+            apk add --no-cache python3 py3-pip \
+            && pip3 install --upgrade pip \
+            && pip3 install awscli \
+            && rm -rf /var/cache/apk/*
       - run:
           name: Get backend url
           command: |
