@@ -381,13 +381,13 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
             # Change this to 0 after the job fails
-                return 1
+                return 0
             else
                 return 1
             fi
       #Here's where you will add some code to rollback on failure  
-      - revert-migrations:
-          workflow-id: "f11a082"
+      # - revert-migrations:
+      #     workflow-id: "f11a082"
           #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
           
 
